@@ -17,6 +17,7 @@ TARGET_INCLUDE_STOCK_ACORE := false
 TARGET_INCLUDE_LIVE_WALLPAPERS := false
 TARGET_SUPPORTS_QUICK_TAP := true
 TARGET_FACE_UNLOCK_SUPPORTED := true
+PEX_MAINTAINER := Prashant
 
 # Inherit from lavender device
 $(call inherit-product, $(LOCAL_PATH)/device.mk)
