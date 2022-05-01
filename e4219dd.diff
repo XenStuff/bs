@@ -1,0 +1,1390 @@
+From e4219dd10388f5be0698d982835287f920643b19 Mon Sep 17 00:00:00 2001
+From: Anay Wadhera <awadhera@berkeley.edu>
+Date: Fri, 15 Apr 2022 23:20:38 -0700
+Subject: [PATCH] ThemePicker: import color section from dotOS
+
+[ghostrider-reborn: rework build setup]
+
+Change-Id: I96670305884efaae8ba1d707ddd406375ed78ed1
+Co-authored-by: Adithya R <gh0strider.2k18.reborn@gmail.com>
+---
+
+diff --git a/Android.bp b/Android.bp
+index dd1968a..0d33269 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -46,6 +46,31 @@
+         + "$(location soong_zip) -o $(out) -C $$RES_DIR -D $$RES_DIR"
+ }
+ 
++android_library {
++    name: "StatixThemePicker-core",
++
++    static_libs: [
++        "colorkt",
++        "monet",
++        "themelib",
++        "wallpaper-common-deps",
++        "SettingsLibSettingsTheme",
++        "SystemUIFlagsLib",
++        "SystemUI-statsd",
++        "styleprotoslite",
++    ],
++
++    optimize: {
++        enabled: false,
++    },
++
++    resource_dirs: ["res"],
++
++    resource_zips: [":WallpaperPicker2_res", ":ThemePicker_res"],
++
++    kotlincflags: ["-Xjvm-default=enable"],
++}
++
+ //
+ // Build app code.
+ //
+@@ -53,13 +78,7 @@
+     name: "StatixThemePicker",
+ 
+     static_libs: [
+-        "colorkt",
+-        "themelib",
+-        "wallpaper-common-deps",
+-        "SettingsLibSettingsTheme",
+-        "SystemUIFlagsLib",
+-        "SystemUI-statsd",
+-        "styleprotoslite",
++        "StatixThemePicker-core",
+     ],
+ 
+     srcs: [
+@@ -91,6 +110,7 @@
+     required: [
+         "privapp_whitelist_com.android.wallpaper",
+         "default_permissions_com.android.wallpaper",
++        "StatixColorStub",
+     ],
+ }
+ 
+diff --git a/res/drawable/color_chip_medium_filled.xml b/res/drawable/color_chip_medium_filled.xml
+new file mode 100644
+index 0000000..0628a30
+--- /dev/null
++++ b/res/drawable/color_chip_medium_filled.xml
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="utf-8"?>
++<shape xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shape="oval">
++    <size
++        android:width="@dimen/component_color_chip_medium_size"
++        android:height="@dimen/component_color_chip_medium_size" />
++    <solid android:color="@android:color/black" />
++</shape>
+diff --git a/res/drawable/color_chip_seed_filled0.xml b/res/drawable/color_chip_seed_filled0.xml
+new file mode 100644
+index 0000000..ebce662
+--- /dev/null
++++ b/res/drawable/color_chip_seed_filled0.xml
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<selector xmlns:android="http://schemas.android.com/apk/res/android">
++    <item>
++        <shape android:shape="rectangle">
++            <corners android:topLeftRadius="@dimen/component_color_chip_small_size_default" />
++            <size android:width="@dimen/component_color_chip_small_size_default" android:height="@dimen/component_color_chip_small_size_default" />
++            <solid android:color="@android:color/black" />
++        </shape>
++    </item>
++</selector>
+diff --git a/res/drawable/color_chip_seed_filled1.xml b/res/drawable/color_chip_seed_filled1.xml
+new file mode 100644
+index 0000000..3abff07
+--- /dev/null
++++ b/res/drawable/color_chip_seed_filled1.xml
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<selector xmlns:android="http://schemas.android.com/apk/res/android">
++    <item>
++        <shape android:shape="rectangle">
++            <corners android:bottomLeftRadius="@dimen/component_color_chip_small_size_default" />
++            <size android:width="@dimen/component_color_chip_small_size_default" android:height="@dimen/component_color_chip_small_size_default" />
++            <solid android:color="@android:color/black" />
++        </shape>
++    </item>
++</selector>
+diff --git a/res/drawable/color_chip_seed_filled2.xml b/res/drawable/color_chip_seed_filled2.xml
+new file mode 100644
+index 0000000..4f11270
+--- /dev/null
++++ b/res/drawable/color_chip_seed_filled2.xml
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<selector xmlns:android="http://schemas.android.com/apk/res/android">
++    <item>
++        <shape android:shape="rectangle">
++            <corners android:topRightRadius="@dimen/component_color_chip_small_size_default" />
++            <size android:width="@dimen/component_color_chip_small_size_default" android:height="@dimen/component_color_chip_small_size_default" />
++            <solid android:color="@android:color/black" />
++        </shape>
++    </item>
++</selector>
+diff --git a/res/drawable/color_chip_seed_filled3.xml b/res/drawable/color_chip_seed_filled3.xml
+new file mode 100644
+index 0000000..54401aa
+--- /dev/null
++++ b/res/drawable/color_chip_seed_filled3.xml
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<selector xmlns:android="http://schemas.android.com/apk/res/android">
++    <item>
++        <shape android:shape="rectangle">
++            <corners android:bottomRightRadius="@dimen/component_color_chip_small_size_default" />
++            <size android:width="@dimen/component_color_chip_small_size_default" android:height="@dimen/component_color_chip_small_size_default" />
++            <solid android:color="@android:color/black" />
++        </shape>
++    </item>
++</selector>
+diff --git a/res/layout/color_option.xml b/res/layout/color_option.xml
+new file mode 100644
+index 0000000..e936210
+--- /dev/null
++++ b/res/layout/color_option.xml
+@@ -0,0 +1,24 @@
++<?xml version="1.0" encoding="utf-8"?>
++<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:clipChildren="false"
++    android:clipToPadding="false"
++    android:orientation="vertical"
++    android:paddingBottom="@dimen/color_option_tile_padding_bottom">
++
++    <RelativeLayout
++        android:id="@+id/option_tile"
++        android:layout_width="@dimen/option_tile_width_big"
++        android:layout_height="@dimen/option_tile_width_big"
++        android:layout_gravity="center_horizontal"
++        android:background="@drawable/option_border_color"
++        android:gravity="center">
++
++        <ImageView
++            android:id="@+id/color_preview_icon"
++            android:layout_width="@dimen/component_color_chip_container_medium_size"
++            android:layout_height="@dimen/component_color_chip_container_medium_size"
++            android:layout_marginHorizontal="@dimen/color_option_tile_margin_horizontal" />
++    </RelativeLayout>
++</FrameLayout>
+diff --git a/res/layout/color_options_view.xml b/res/layout/color_options_view.xml
+new file mode 100644
+index 0000000..b86428f
+--- /dev/null
++++ b/res/layout/color_options_view.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
++    android:id="@+id/color_option_container"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:orientation="horizontal" />
+diff --git a/res/layout/color_section_view.xml b/res/layout/color_section_view.xml
+new file mode 100644
+index 0000000..3b6a69c
+--- /dev/null
++++ b/res/layout/color_section_view.xml
+@@ -0,0 +1,27 @@
++<?xml version="1.0" encoding="utf-8"?>
++<com.statix.android.customization.picker.color.ColorSectionView
++    xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:orientation="vertical">
++
++    <FrameLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingHorizontal="@dimen/separated_tabs_horizontal_margin">
++
++        <include layout="@layout/separated_tabs" />
++    </FrameLayout>
++
++    <androidx.viewpager2.widget.ViewPager2
++        android:id="@+id/color_view_pager"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:layout_marginVertical="@dimen/color_options_container_top_margin"
++        android:clipChildren="false"
++        android:clipToPadding="false"
++        android:minHeight="@dimen/color_options_container_min_height"
++        android:paddingHorizontal="@dimen/section_horizontal_padding" />
++
++
++</com.statix.android.customization.picker.color.ColorSectionView>
+diff --git a/res/layout/color_seed_option.xml b/res/layout/color_seed_option.xml
+new file mode 100644
+index 0000000..8f16c8c
+--- /dev/null
++++ b/res/layout/color_seed_option.xml
+@@ -0,0 +1,53 @@
++<?xml version="1.0" encoding="utf-8"?>
++<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:clipChildren="false"
++    android:clipToPadding="false"
++    android:orientation="vertical"
++    android:paddingBottom="@dimen/color_option_tile_padding_bottom">
++
++    <FrameLayout
++        android:id="@+id/option_tile"
++        android:layout_width="@dimen/option_tile_width_big"
++        android:layout_height="@dimen/option_tile_width_big"
++        android:layout_gravity="center_horizontal"
++        android:background="@drawable/option_border_color">
++
++        <ImageView
++            android:id="@+id/color_preview_0"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_gravity="center"
++            android:layout_marginEnd="@dimen/color_seed_chip_margin"
++            android:layout_marginBottom="@dimen/color_seed_chip_margin"
++            android:src="@drawable/color_chip_seed_filled0" />
++
++        <ImageView
++            android:id="@+id/color_preview_1"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_gravity="center"
++            android:layout_marginStart="@dimen/color_seed_chip_margin"
++            android:layout_marginBottom="@dimen/color_seed_chip_margin"
++            android:src="@drawable/color_chip_seed_filled2" />
++
++        <ImageView
++            android:id="@+id/color_preview_2"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_gravity="center"
++            android:layout_marginTop="@dimen/color_seed_chip_margin"
++            android:layout_marginEnd="@dimen/color_seed_chip_margin"
++            android:src="@drawable/color_chip_seed_filled1" />
++
++        <ImageView
++            android:id="@+id/color_preview_3"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_gravity="center"
++            android:layout_marginStart="@dimen/color_seed_chip_margin"
++            android:layout_marginTop="@dimen/color_seed_chip_margin"
++            android:src="@drawable/color_chip_seed_filled3" />
++    </FrameLayout>
++</FrameLayout>
+diff --git a/res/values/dimens.xml b/res/values/dimens.xml
+index e0f7e12..dc0d51c 100644
+--- a/res/values/dimens.xml
++++ b/res/values/dimens.xml
+@@ -18,4 +18,20 @@
+ <resources>
+     <dimen name="icon_options_container_min_height">96dp</dimen>
+     <dimen name="icon_options_container_top_margin">24dp</dimen>
++
++    <!-- Color section -->
++    <dimen name="color_option_tile_margin_horizontal">2dp</dimen>
++    <dimen name="color_option_tile_padding_bottom">11dp</dimen>
++    <dimen name="color_options_container_min_height">96dp</dimen>
++    <dimen name="color_options_container_top_margin">24dp</dimen>
++    <dimen name="color_seed_chip_margin">12dp</dimen>
++    <dimen name="color_seed_option_tile_padding">10dp</dimen>
++    <dimen name="color_seed_option_tile_padding_selected">6dp</dimen>
++    <dimen name="component_color_chip_container_medium_size">48dp</dimen>
++    <dimen name="component_color_chip_medium_size">48dp</dimen>
++    <dimen name="component_color_chip_small_size_default">24dp</dimen>
++    <dimen name="component_color_chip_small_size_selected">32dp</dimen>
++    <dimen name="option_tile_width_big">82dp</dimen>
++    <!--  Default page horizontal margin (24dp) - separated tabs inset horizontal (4dp) -->
++    <dimen name="separated_tabs_horizontal_margin">20dp</dimen>
+ </resources>
+diff --git a/res/values/override.xml b/res/values/override.xml
+new file mode 100644
+index 0000000..76ee96b
+--- /dev/null
++++ b/res/values/override.xml
+@@ -0,0 +1,16 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++     Copyright (C) 2018 The Android Open Source Project
++     Licensed under the Apache License, Version 2.0 (the "License");
++     you may not use this file except in compliance with the License.
++     You may obtain a copy of the License at
++          http://www.apache.org/licenses/LICENSE-2.0
++     Unless required by applicable law or agreed to in writing, software
++     distributed under the License is distributed on an "AS IS" BASIS,
++     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     See the License for the specific language governing permissions and
++     limitations under the License.
++-->
++<resources>
++    <string name="themes_stub_package" translatable="false">com.statix.colorstub</string>
++</resources>
+diff --git a/res/values/strings.xml b/res/values/strings.xml
+index f16edb2..cb88dc0 100644
+--- a/res/values/strings.xml
++++ b/res/values/strings.xml
+@@ -20,4 +20,9 @@
+ 
+     <string name="icon_pack_title">System Icon Packs</string>
+     <string name="icon_preview_card_content_description">Icon Preview</string>
++
++    <string name="wallpaper_color_tab">Wallpaper colors</string>
++    <string name="wallpaper_color_title">Wallpaper color</string>
++    <string name="preset_color_tab">Basic colors</string>
++    <string name="color_changed">Color changed</string>
+ </resources>
+diff --git a/src/com/statix/android/customization/model/color/ColorBundle.kt b/src/com/statix/android/customization/model/color/ColorBundle.kt
+new file mode 100644
+index 0000000..4ca2294
+--- /dev/null
++++ b/src/com/statix/android/customization/model/color/ColorBundle.kt
+@@ -0,0 +1,59 @@
++package com.statix.android.customization.model.color
++
++import android.annotation.SuppressLint
++import android.content.res.ColorStateList
++import android.content.res.Configuration
++import android.graphics.drawable.GradientDrawable
++import android.view.View
++import android.widget.ImageView
++import com.android.wallpaper.R
++
++class ColorBundle(
++    title: String?,
++    map: Map<String?, String?>?,
++    isDefault: Boolean,
++    index: Int,
++    private val mPreviewInfo: PreviewInfo
++) : ColorOption(
++    title!!, map!!, isDefault, index
++) {
++    class PreviewInfo(
++        val secondaryColorLight: Int,
++        val secondaryColorDark: Int,
++    )
++
++    @SuppressLint("UseCompatLoadingForDrawables")
++    override fun bindThumbnailTile(view: View) {
++        val resources = view.context.resources
++        val thumbnailView = view.findViewById<ImageView>(R.id.color_preview_icon)
++        val secondaryColor =
++            if ((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) mPreviewInfo.secondaryColorDark
++            else mPreviewInfo.secondaryColorLight
++        val gradientDrawable = view.resources.getDrawable(
++            R.drawable.color_chip_medium_filled, thumbnailView.context.theme
++        ) as GradientDrawable
++        if (secondaryColor != 0) {
++            gradientDrawable.setTintList(ColorStateList.valueOf(secondaryColor))
++        } else {
++            gradientDrawable.setTintList(ColorStateList.valueOf(resources.getColor(R.color.material_white_100)))
++        }
++        thumbnailView.setImageDrawable(gradientDrawable)
++        val context = view.context
++        if (mContentDescription == null) {
++            val string = context.getString(R.string.default_theme_title)
++            mContentDescription = if (mIsDefault) {
++                string
++            } else {
++                mTitle
++            }
++        }
++        view.contentDescription = mContentDescription
++    }
++
++    override fun getLayoutResId(): Int {
++        return R.layout.color_option
++    }
++
++    override val source: String
++        get() = "preset"
++}
+diff --git a/src/com/statix/android/customization/model/color/ColorCustomizationManager.kt b/src/com/statix/android/customization/model/color/ColorCustomizationManager.kt
+new file mode 100644
+index 0000000..2086b45
+--- /dev/null
++++ b/src/com/statix/android/customization/model/color/ColorCustomizationManager.kt
+@@ -0,0 +1,238 @@
++package com.statix.android.customization.model.color
++
++import android.app.WallpaperColors
++import android.content.ContentResolver
++import android.content.Context
++import android.database.ContentObserver
++import android.net.Uri
++import android.os.Handler
++import android.os.Looper
++import android.os.SystemClock
++import android.provider.Settings
++import android.text.TextUtils
++import android.util.Log
++import com.android.wallpaper.R
++import com.android.customization.model.CustomizationManager
++import com.android.customization.model.CustomizationManager.OptionsFetchedListener
++import com.statix.android.customization.picker.color.ColorSectionView
++import org.json.JSONException
++import org.json.JSONObject
++import java.util.concurrent.Executors
++
++class ColorCustomizationManager(
++    val mProvider: ColorOptionsProvider,
++    private val mContentResolver: ContentResolver
++) : CustomizationManager<ColorOption> {
++    var mCurrentOverlays: Map<String, String>? = null
++    private var mCurrentSource: String? = null
++    var mHomeWallpaperColors: WallpaperColors? = null
++    var mLockWallpaperColors: WallpaperColors? = null
++
++    companion object {
++        var COLOR_OVERLAY_SETTINGS: Set<String>? = null
++        private var sColorCustomizationManager: ColorCustomizationManager? = null
++        val sExecutorService = Executors.newSingleThreadExecutor()!!
++        fun getInstance(
++            context: Context
++        ): ColorCustomizationManager? {
++            if (sColorCustomizationManager == null) {
++                val applicationContext = context.applicationContext
++                sColorCustomizationManager = ColorCustomizationManager(
++                    ColorProvider(
++                        applicationContext, applicationContext.getString(
++                            R.string.themes_stub_package
++                        )
++                    ), applicationContext.contentResolver
++                )
++            }
++            return sColorCustomizationManager
++        }
++
++        init {
++            val hashSet = HashSet<String>()
++            COLOR_OVERLAY_SETTINGS = hashSet
++            hashSet.add("android.theme.customization.system_palette")
++            hashSet.add("android.theme.customization.accent_color")
++            hashSet.add("android.theme.customization.color_source")
++        }
++    }
++
++    init {
++        mContentResolver.registerContentObserver(Settings.Secure.CONTENT_URI, true, object :
++            ContentObserver(Handler(Looper.getMainLooper())) {
++            override fun onChange(selfChange: Boolean, uri: Uri?) {
++                super.onChange(selfChange, uri)
++                if (TextUtils.equals(
++                        uri!!.lastPathSegment,
++                        "theme_customization_overlay_packages"
++                    )
++                ) {
++                    mCurrentOverlays = null
++                }
++
++            }
++        })
++    }
++
++    val currentColorSource: String?
++        get() {
++            if (mCurrentSource == null) {
++                parseSettings(storedOverlays)
++            }
++            return mCurrentSource
++        }
++    val storedOverlays: String?
++         get() = Settings.Secure.getString(mContentResolver, "theme_customization_overlay_packages")
++
++    fun parseSettings(str: String?) {
++        val hashMap = HashMap<String, String>()
++        if (str != null) {
++            try {
++                val jSONObject = JSONObject(str)
++                val names = jSONObject.names()
++                if (names != null) {
++                    for (i in 0 until names.length()) {
++                        val string = names.getString(i)
++                        if ((COLOR_OVERLAY_SETTINGS as HashSet<String>?)!!.contains(string)) {
++                            try {
++                                hashMap[string] = jSONObject.getString(string)
++                            } catch (e: JSONException) {
++                                Log.e(
++                                    "ColorCustomizationManager",
++                                    "parseColorOverlays: " + e.localizedMessage,
++                                    e
++                                )
++                            }
++                        }
++                    }
++                }
++            } catch (e2: JSONException) {
++                Log.e("ColorCustomizationManager", e2.localizedMessage!!)
++            }
++        }
++        mCurrentSource = hashMap.remove("android.theme.customization.color_source")
++        mCurrentOverlays = hashMap
++    }
++
++    override fun isAvailable(): Boolean {
++        return true
++    }
++
++    fun setThemeBundle(colorSectionController: ColorSectionController, option: ColorOption) {
++        if (SystemClock.elapsedRealtime() - colorSectionController.mLastColorApplyingTime >= 500) {
++            colorSectionController.mLastColorApplyingTime = SystemClock.elapsedRealtime()
++            val callback: CustomizationManager.Callback = object : CustomizationManager.Callback {
++                override fun onError(th2: Throwable?) {
++                    Log.w("ColorSectionController", "Apply theme with error: null")
++                }
++
++                override fun onSuccess() {
++                    val colorSectionView: ColorSectionView =
++                        colorSectionController.mColorSectionView!!
++                    colorSectionView.announceForAccessibility(
++                        colorSectionView.context.getString(
++                            R.string.color_changed
++                        )
++                    )
++                    val wallpaperColors = colorSectionController.mLockWallpaperColors
++                    var i3 = 0
++                    val z2 =
++                        wallpaperColors == null || wallpaperColors == colorSectionController.mHomeWallpaperColors
++                    if (TextUtils.equals(option.source, "preset")) {
++                        i3 = 26
++                    } else if (z2) {
++                        i3 = 25
++                    } else {
++                        val source = option.source
++                        if (source == "lock_wallpaper") {
++                            i3 = 24
++                        } else if (source == "home_wallpaper") {
++                            i3 = 23
++                        }
++                    }
++                    colorSectionController.mEventLogger.logColorApplied(i3, option.mIndex)
++                }
++            }
++            sExecutorService.submit {
++                applyBundle(option, callback)
++            }
++            return
++        }
++    }
++
++    private fun applyBundle(option: ColorOption, callback: CustomizationManager.Callback) {
++        var mStoredOverlays = storedOverlays
++        if (TextUtils.isEmpty(mStoredOverlays) || mStoredOverlays == null) {
++            mStoredOverlays = "{}"
++        }
++        var z4: Boolean
++        var jSONObject: JSONObject? = null
++        try {
++            jSONObject = JSONObject(mStoredOverlays)
++            try {
++                val jsonPackages: JSONObject = option.getJsonPackages(true)
++                val it: Iterator<*> =
++                    (COLOR_OVERLAY_SETTINGS as HashSet?)!!.iterator()
++                while (it.hasNext()) {
++                    jSONObject.remove(it.next() as String?)
++                }
++                val keys: Iterator<String> = jsonPackages.keys()
++                while (keys.hasNext()) {
++                    val next = keys.next()
++                    jSONObject.put(next, jsonPackages.get(next))
++                }
++                jSONObject.put(
++                    "android.theme.customization.color_source",
++                    option.source
++                )
++                jSONObject.put(
++                    "android.theme.customization.color_index",
++                    option.mIndex.toString()
++                )
++                if ("preset" != option.source) {
++                    val wallpaperColors = mLockWallpaperColors
++                    if (wallpaperColors != null && wallpaperColors != mHomeWallpaperColors) {
++                        z4 = false
++                        jSONObject.put(
++                            "android.theme.customization.color_both",
++                            if (!z4) "1" else "0"
++                        )
++                    }
++                    z4 = true
++                    jSONObject.put(
++                        "android.theme.customization.color_both",
++                        if (!z4) "1" else "0"
++                    )
++                } else {
++                    jSONObject.remove("android.theme.customization.color_both")
++                }
++            } catch (e2: JSONException) {
++                e2.printStackTrace()
++                Handler(Looper.getMainLooper()).post {
++                    val success = Settings.Secure.putString(
++                        mContentResolver,
++                        "theme_customization_overlay_packages", jSONObject.toString()
++                    )
++                    if (success) callback.onSuccess()
++                    else callback.onError(null)
++                }
++                return
++            }
++        } catch (e3: JSONException) {
++            e3.printStackTrace()
++        }
++        Handler(Looper.getMainLooper()).post {
++            val success = jSONObject != null && Settings.Secure.putString(
++                mContentResolver,
++                "theme_customization_overlay_packages", jSONObject.toString()
++            )
++            if (success) callback.onSuccess()
++            else callback.onError(null)
++        }
++    }
++
++    override fun apply(option: ColorOption, callback: CustomizationManager.Callback) {
++        applyBundle(option, callback)
++    }
++    override fun fetchOptions(callback: OptionsFetchedListener<ColorOption>, reload: Boolean) {}
++}
+diff --git a/src/com/statix/android/customization/model/color/ColorOption.kt b/src/com/statix/android/customization/model/color/ColorOption.kt
+new file mode 100644
+index 0000000..56b35a9
+--- /dev/null
++++ b/src/com/statix/android/customization/model/color/ColorOption.kt
+@@ -0,0 +1,97 @@
++package com.statix.android.customization.model.color
++
++import android.text.TextUtils
++import android.util.Log
++import com.android.customization.model.CustomizationManager
++import com.android.customization.model.CustomizationOption
++import org.json.JSONException
++import org.json.JSONObject
++import java.util.*
++import java.util.stream.Collectors
++
++abstract class ColorOption(
++    val mTitle: String,
++    map: Map<String?, String?>,
++    val mIsDefault: Boolean,
++    val mIndex: Int
++) : CustomizationOption<ColorOption> {
++    var mContentDescription: CharSequence? = null
++    private val mPackagesByCategory: Map<String?, String?>
++
++    fun getJsonPackages(z: Boolean): JSONObject {
++        val jSONObject: JSONObject = if (mIsDefault) {
++            JSONObject()
++        } else {
++            val jSONObject2 = JSONObject(mPackagesByCategory)
++            val keys = jSONObject2.keys()
++            val hashSet: HashSet<String> = HashSet<String>()
++            while (keys.hasNext()) {
++                val next = keys.next()
++                if (jSONObject2.isNull(next)) {
++                    hashSet.add(next)
++                }
++            }
++            val it: Iterator<*> = hashSet.iterator()
++            while (it.hasNext()) {
++                jSONObject2.remove(it.next() as String?)
++            }
++            jSONObject2
++        }
++        if (z) {
++            try {
++                jSONObject.put(TIMESTAMP_FIELD, System.currentTimeMillis())
++            } catch (unused: JSONException) {
++                Log.e("ColorOption", "Couldn't add timestamp to serialized themebundle")
++            }
++        }
++        return jSONObject
++    }
++
++    abstract val source: String
++
++    override fun getTitle(): String {
++        return mTitle
++    }
++
++    override fun isActive(customizationManager: CustomizationManager<ColorOption>): Boolean {
++        val colorCustomizationManager = customizationManager as ColorCustomizationManager
++        if (mIsDefault) {
++            val storedOverlays = colorCustomizationManager.storedOverlays
++            if (!TextUtils.isEmpty(storedOverlays) && "{}" != storedOverlays) {
++                if (colorCustomizationManager.mCurrentOverlays == null) {
++                    colorCustomizationManager.parseSettings(colorCustomizationManager.storedOverlays)
++                }
++                if (colorCustomizationManager.mCurrentOverlays!!.isNotEmpty() &&
++                    (storedOverlays!!.contains("android.theme.customization.system_palette") ||
++                     storedOverlays.contains("android.theme.customization.accent_color"))
++                ) {
++                    return false
++                }
++            }
++            return true
++        }
++        if (colorCustomizationManager.mCurrentOverlays == null) {
++            colorCustomizationManager.parseSettings(colorCustomizationManager.storedOverlays)
++        }
++        val map = colorCustomizationManager.mCurrentOverlays
++        val currentColorSource = colorCustomizationManager.currentColorSource
++        return (TextUtils.isEmpty(currentColorSource) || source == currentColorSource) && mPackagesByCategory == map
++    }
++
++    companion object {
++        const val TIMESTAMP_FIELD = "_applied_timestamp"
++    }
++
++    init {
++        mPackagesByCategory = Collections.unmodifiableMap(
++            map.entries.stream().filter { t -> t.value != null }
++                .collect(
++                    Collectors.toMap(
++                        { t -> t.key },
++                        { t -> t.value }
++                    )
++                ) as Map<String?, String?>
++        )
++
++    }
++}
+diff --git a/src/com/statix/android/customization/model/color/ColorOptionsProvider.kt b/src/com/statix/android/customization/model/color/ColorOptionsProvider.kt
+new file mode 100644
+index 0000000..006cb5f
+--- /dev/null
++++ b/src/com/statix/android/customization/model/color/ColorOptionsProvider.kt
+@@ -0,0 +1,3 @@
++package com.statix.android.customization.model.color
++
++interface ColorOptionsProvider 
+diff --git a/src/com/statix/android/customization/model/color/ColorProvider.kt b/src/com/statix/android/customization/model/color/ColorProvider.kt
+new file mode 100644
+index 0000000..e98a1ee
+--- /dev/null
++++ b/src/com/statix/android/customization/model/color/ColorProvider.kt
+@@ -0,0 +1,241 @@
++package com.statix.android.customization.model.color
++
++import android.app.WallpaperColors
++import android.content.Context
++import android.content.res.ColorStateList
++import android.util.Log
++import androidx.core.graphics.ColorUtils
++import com.android.customization.model.ResourcesApkProvider
++import com.android.wallpaper.compat.WallpaperManagerCompat
++import com.android.wallpaper.module.InjectorProvider
++import com.android.systemui.monet.ColorScheme
++import com.statix.android.customization.model.color.ColorUtils.toColorString
++import kotlinx.coroutines.CoroutineScope
++import java.util.*
++import kotlin.collections.ArrayList
++import kotlin.collections.HashMap
++
++class ColorProvider(context: Context, stubPackageName: String) :
++    ResourcesApkProvider(context, stubPackageName), ColorOptionsProvider {
++    var colorBundles: List<ColorOption>? = null
++    var homeWallpaperColors: WallpaperColors? = null
++    var lockWallpaperColors: WallpaperColors? = null
++    val scope: CoroutineScope? = null
++    private fun buildBundle(
++        seed: Int,
++        index: Int,
++        mIsDefault: Boolean,
++        source: String?,
++        list: ArrayList<ColorOption>
++    ) {
++
++        val hashMap: HashMap<String?, String?> = HashMap()
++        val colorScheme = ColorScheme(seed, false)
++        val colorSchemeDark = ColorScheme(seed, true)
++        val secondaryColorLight = intArrayOf(
++            ColorUtils.setAlphaComponent(colorScheme.accent1[2], 255), ColorUtils.setAlphaComponent(
++                colorScheme.accent1[2], 255
++            ), ColorStateList.valueOf(
++                colorScheme.accent3[6]
++            ).withLStar(85.0f).colors[0], ColorUtils.setAlphaComponent(
++                colorScheme.accent1[6], 255
++            )
++        )
++        val secondaryColorDark = intArrayOf(
++            ColorUtils.setAlphaComponent(colorSchemeDark.accent1[2], 255),
++            ColorUtils.setAlphaComponent(
++                colorSchemeDark.accent1[2], 255
++            ),
++            ColorStateList.valueOf(
++                colorSchemeDark.accent3[6]
++            ).withLStar(85.0f).colors[0],
++            ColorUtils.setAlphaComponent(
++                colorSchemeDark.accent1[6], 255
++            )
++        )
++        var source3 = ""
++        val source2 = if (mIsDefault) {
++            source3
++        } else {
++            toColorString(seed)
++        }
++        hashMap["android.theme.customization.system_palette"] = source2
++        if (!mIsDefault) {
++            source3 = toColorString(seed)
++        }
++        hashMap["android.theme.customization.accent_color"] = source3
++        list.add(
++            ColorSeedOption(
++                source,
++                hashMap,
++                mIsDefault,
++                source!!,
++                1 + index,
++                ColorSeedOption.PreviewInfo(secondaryColorLight, secondaryColorDark)
++            )
++        )
++    }
++
++    private fun loadPreset() {
++        val bundlesList = ArrayList<String>()
++        val bundleNames = mStubApkResources.getStringArray(
++            mStubApkResources.getIdentifier(
++                "color_bundles",
++                "array",
++                mStubPackageName
++            )
++        )
++        for (i in bundleNames.indices) {
++            if (i == 4) break
++            bundlesList.add(bundleNames[i])
++        }
++        val colorPresetBundles = ArrayList<ColorOption>()
++        var position = 1;
++        for (bundle in bundlesList) {
++            val hashMap: HashMap<String?, String?> = HashMap()
++            val bundleName = getItemStringFromStub("bundle_name_", bundle)
++            val bundleColorPrimary = getItemColorFromStub("color_primary_", bundle)
++            val bundleColorSecondary = getItemColorFromStub("color_secondary_", bundle)
++            hashMap["android.theme.customization.system_palette"] =
++                toColorString(bundleColorSecondary)
++            hashMap["android.theme.customization.accent_color"] = toColorString(bundleColorPrimary)
++            val accentColor = ColorScheme(bundleColorPrimary, false).accentColor
++            val accentColor2 = ColorScheme(bundleColorPrimary, true).accentColor
++            colorPresetBundles.add(
++                ColorBundle(
++                    bundleName,
++                    hashMap,
++                    false,
++                    index = position,
++                    mPreviewInfo = ColorBundle.PreviewInfo(
++                        accentColor,
++                        accentColor2
++                    )
++                )
++            )
++            position++
++        }
++        this.colorBundles = colorPresetBundles
++    }
++
++    fun buildColorSeeds(
++        wallpaperColors: WallpaperColors,
++        count: Int,
++        source: String?,
++        isDefault: Boolean,
++        list: ArrayList<ColorOption>
++    ) {
++        val list2: List<Int>
++        val list3: List<Int>
++        val seedColors: List<Int> = ColorScheme.getSeedColors(wallpaperColors)
++        loadPreset()
++        buildBundle(
++            seedColors[0],
++            0,
++            isDefault,
++            source,
++            list
++        )
++        val size = seedColors.size - 1
++        list2 = if (size <= 0) {
++            ArrayList()
++        } else if (size != 1) {
++            val arrayList: ArrayList<Int> = ArrayList(size)
++            val listIterator = seedColors.listIterator(1)
++            while (listIterator.hasNext()) {
++                arrayList.add(listIterator.next())
++            }
++            arrayList
++        } else if (seedColors.isNotEmpty()) {
++            listOf(seedColors[seedColors.size - 1])
++        } else {
++            throw NoSuchElementException("List is empty.")
++        }
++        val i3 = count - 1
++        var index4 = 0
++        if (i3 >= 0) {
++            list3 = if (i3 == 0) {
++                ArrayList()
++            } else (if (i3 >= list2.size) {
++                list2
++            } else if (i3 == 1) {
++                listOf(list2[0])
++            } else {
++                val arrayList2: ArrayList<Int> = ArrayList(i3)
++                var i5 = 0
++                for (obj in list2) {
++                    arrayList2.add(obj)
++                    i5++
++                    if (i5 == i3) {
++                        break
++                    }
++                }
++                arrayList2
++            })
++            for (seed in list3) {
++                index4++
++                buildBundle(seed, index4, false, source, list)
++            }
++            return
++        }
++        throw IllegalArgumentException("Requested element count $i3 is less than zero.")
++    }
++
++    companion object {
++
++        fun loadSeedColors(
++            colorProvider: ColorProvider,
++            wallpaperColors: WallpaperColors?,
++            wallpaperColors2: WallpaperColors?
++        ) {
++            val arrayList = ArrayList<ColorOption>()
++            if (wallpaperColors != null) {
++                val count = if (wallpaperColors2 == null) 4 else 2
++                if (wallpaperColors2 != null) {
++                    val wallpaperManagerCompat: WallpaperManagerCompat =
++                        InjectorProvider.getInjector()
++                            .getWallpaperManagerCompat(colorProvider.mContext)
++                    var isDefault = true
++                    if (wallpaperManagerCompat.getWallpaperId(WallpaperManagerCompat.FLAG_LOCK) <= wallpaperManagerCompat.getWallpaperId(
++                            WallpaperManagerCompat.FLAG_SYSTEM
++                        )
++                    ) {
++                        isDefault = false
++                    }
++                    colorProvider.buildColorSeeds(
++                        if (isDefault) wallpaperColors2 else wallpaperColors,
++                        count,
++                        if (isDefault) "lock_wallpaper" else "home_wallpaper",
++                        true,
++                        arrayList
++                    )
++                    colorProvider.buildColorSeeds(
++                        if (isDefault) wallpaperColors else wallpaperColors2,
++                        count,
++                        if (isDefault) "home_wallpaper" else "lock_wallpaper",
++                        false,
++                        arrayList
++                    )
++                } else {
++                    colorProvider.buildColorSeeds(
++                        wallpaperColors,
++                        count,
++                        "home_wallpaper",
++                        true,
++                        arrayList
++                    )
++                }
++                val list = colorProvider.colorBundles
++                val arrayList2 = ArrayList<ColorOption>()
++                if (list != null) {
++                    for (t in list) {
++                        arrayList2.add(t)
++                    }
++                }
++                arrayList.addAll(arrayList2)
++                colorProvider.colorBundles = arrayList
++            }
++        }
++    }
++
++}
+diff --git a/src/com/statix/android/customization/model/color/ColorSectionController.kt b/src/com/statix/android/customization/model/color/ColorSectionController.kt
+new file mode 100644
+index 0000000..c3d91ef
+--- /dev/null
++++ b/src/com/statix/android/customization/model/color/ColorSectionController.kt
+@@ -0,0 +1,260 @@
++package com.statix.android.customization.model.color
++
++import android.app.Activity
++import android.app.WallpaperColors
++import android.content.Context
++import android.os.Bundle
++import android.os.Handler
++import android.os.Looper
++import android.util.Log
++import android.view.LayoutInflater
++import android.view.View
++import android.view.ViewGroup
++import android.widget.LinearLayout
++import androidx.lifecycle.LifecycleOwner
++import androidx.lifecycle.lifecycleScope
++import androidx.recyclerview.widget.RecyclerView
++import androidx.viewpager2.widget.ViewPager2
++import com.android.customization.model.CustomizationManager
++import com.android.customization.module.CustomizationInjector
++import com.android.customization.module.ThemesUserEventLogger
++import com.android.customization.widget.OptionSelectorController
++import com.android.wallpaper.R
++import com.android.wallpaper.model.CustomizationSectionController;
++import com.android.wallpaper.model.CustomizationSectionController.CustomizationSectionNavigationController;
++import com.android.wallpaper.module.InjectorProvider
++import com.android.wallpaper.widget.SeparatedTabLayout
++import com.android.wallpaper.model.WallpaperColorsViewModel
++import com.statix.android.customization.picker.color.ColorSectionView
++import kotlinx.coroutines.launch
++
++
++class ColorSectionController(
++    activity: Activity?,
++    wallpaperColorsViewModel: WallpaperColorsViewModel,
++    lifecycleOwner: LifecycleOwner,
++    bundle: Bundle?,
++    private val navigationController: CustomizationSectionNavigationController
++) : CustomizationSectionController<ColorSectionView?> {
++
++    val mColorManager: ColorCustomizationManager
++    var mColorSectionView: ColorSectionView? = null
++    private var mColorSectionAdapter = ColorSectionAdapter()
++    private lateinit var mColorViewPager: ViewPager2
++    val mEventLogger: ThemesUserEventLogger
++    var mHomeWallpaperColors: WallpaperColors? = null
++    private var mHomeWallpaperColorsReady = false
++    private val mLifecycleOwner: LifecycleOwner
++    var mLockWallpaperColors: WallpaperColors? = null
++    private var mLockWallpaperColorsReady = false
++    val mPresetColorOptions: MutableList<ColorOption?> = ArrayList()
++    var mSelectedColor: ColorOption? = null
++    private var mTabLayout: SeparatedTabLayout? = null
++    private var mTabPositionToRestore: Int? = null
++    val mWallpaperColorOptions: MutableList<ColorOption?> = ArrayList()
++    private val mWallpaperColorsViewModel: WallpaperColorsViewModel
++    var mLastColorApplyingTime: Long = 0
++
++
++    inner class ColorSectionAdapter :
++        RecyclerView.Adapter<RecyclerView.ViewHolder>() {
++        private val mItemCounts = 2
++
++        inner class ColorOptionsViewHolder(view: View) :
++            RecyclerView.ViewHolder(
++                view
++            )
++
++        override fun getItemCount(): Int {
++            return mItemCounts
++        }
++
++        override fun getItemViewType(i: Int): Int {
++            return R.layout.color_options_view
++        }
++
++        override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
++            val view = viewHolder.itemView as? RecyclerView ?: return
++            val colorSectionController = this@ColorSectionController
++            val colorOptions =
++                if (position == 0) colorSectionController.mWallpaperColorOptions
++                else colorSectionController.mPresetColorOptions
++            val optionSelectorController = OptionSelectorController(
++                view,
++                colorOptions,
++                true,
++                OptionSelectorController.CheckmarkStyle.CENTER
++            )
++            optionSelectorController.initOptions(colorSectionController.mColorManager)
++            colorSectionController.setUpColorOptionsController(optionSelectorController)
++        }
++
++        override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): RecyclerView.ViewHolder {
++            return ColorOptionsViewHolder(
++                LayoutInflater.from(viewGroup.context).inflate(i, viewGroup, false)
++            )
++        }
++    }
++
++    override fun createView(context: Context): ColorSectionView {
++        mColorSectionView = LayoutInflater.from(context)
++            .inflate(R.layout.color_section_view, null as ViewGroup?) as ColorSectionView
++        mColorViewPager = mColorSectionView!!.requireViewById<ViewPager2>(R.id.color_view_pager)
++        mTabLayout = mColorSectionView!!.requireViewById(R.id.separated_tabs)
++        if (mColorViewPager.adapter == null) {
++            mColorViewPager.setAdapter(mColorSectionAdapter)
++        }
++        mTabLayout!!.setViewPager(mColorViewPager)
++        mWallpaperColorsViewModel.homeWallpaperColors.observe(mLifecycleOwner) {
++            mHomeWallpaperColors = it
++            mHomeWallpaperColorsReady = true
++            maybeLoadColors()
++        }
++
++        mWallpaperColorsViewModel.lockWallpaperColors.observe(mLifecycleOwner) {
++            mLockWallpaperColors = it
++            mLockWallpaperColorsReady = true
++            maybeLoadColors()
++        }
++
++        mLifecycleOwner.lifecycleScope.launchWhenResumed {
++            mTabPositionToRestore?.let { mColorViewPager.setCurrentItem(it, false) }
++        }
++
++        return mColorSectionView!!
++    }
++
++    override fun isAvailable(context: Context?): Boolean {
++        return context != null && ColorUtils.isMonetEnabled(context)
++    }
++
++    private fun maybeLoadColors() {
++        if (mHomeWallpaperColorsReady && mLockWallpaperColorsReady) {
++            val wallpaperColors = mHomeWallpaperColors
++            var wallpaperColors2 = mLockWallpaperColors
++            mColorManager.mHomeWallpaperColors = wallpaperColors
++            mColorManager.mLockWallpaperColors = wallpaperColors2
++            val optionsFetcher =
++                object : CustomizationManager.OptionsFetchedListener<ColorOption?> {
++                    override fun onError(th: Throwable?) {
++                        if (th != null) {
++                            Log.e("ColorSectionController", "Error loading theme bundles", th)
++                        }
++                    }
++
++                    override fun onOptionsLoaded(list: List<ColorOption?>) {
++                        if (list.isNotEmpty()) {
++                            var colorOption: ColorOption?
++                            val colorOption2: ColorOption
++                            mWallpaperColorOptions.clear()
++                            mPresetColorOptions.clear()
++                            for (colorOption3 in list) {
++                                if (colorOption3 is ColorSeedOption) {
++                                    mWallpaperColorOptions.add(colorOption3)
++                                } else if (colorOption3 is ColorBundle) {
++                                    mPresetColorOptions.add(colorOption3)
++                                }
++                            }
++                            val allColors = ArrayList<ColorOption?>()
++                            allColors.addAll(mWallpaperColorOptions)
++                            allColors.addAll(mPresetColorOptions)
++                            val iterator = allColors.iterator()
++                            while (true) {
++                                if (!iterator.hasNext()) {
++                                    colorOption = null
++                                    break
++                                }
++                                colorOption = iterator.next()
++                                if (colorOption!!.isActive(mColorManager)) {
++                                    break
++                                }
++                            }
++                            if (colorOption == null) {
++                                colorOption2 =
++                                    (if (mWallpaperColorOptions.isEmpty()) mPresetColorOptions[0]!! else mWallpaperColorOptions[0]!!)
++                                colorOption = colorOption2
++                            }
++                            mSelectedColor = colorOption
++                            mColorViewPager.post {
++                                mColorViewPager.adapter?.notifyItemChanged(0)
++                                if (mTabLayout != null && mTabLayout!!.tabCount == 0) {
++                                    val newTab = mTabLayout!!.newTab()
++                                    newTab.setText(R.string.wallpaper_color_tab)
++                                    mTabLayout!!.addTab(newTab, 0, mTabLayout!!.tabCount == 0)
++                                    val newTab2 = mTabLayout!!.newTab()
++                                    newTab2.setText(R.string.preset_color_tab)
++                                    mTabLayout!!.addTab(newTab2, 1, mTabLayout!!.tabCount == 0)
++                                }
++                                if (mWallpaperColorOptions.isEmpty()) {
++                                    mTabLayout!!.getTabAt(0)!!.view.isEnabled = false
++                                    mColorViewPager.setCurrentItem(1, false)
++                                }
++                                mColorViewPager.setCurrentItem(
++                                    if ("preset" == mColorManager.currentColorSource) 1 else 0,
++                                    false
++                                )
++                            }
++                        }
++                    }
++                }
++            if (wallpaperColors2 != null && wallpaperColors2 == wallpaperColors) {
++                wallpaperColors2 = null
++            }
++            val wallpaperColors3 = mColorManager.mHomeWallpaperColors
++            val colorProvider = mColorManager.mProvider as ColorProvider
++            val wallpapersColorsChanged = (colorProvider.homeWallpaperColors == wallpaperColors3
++                    ) || (colorProvider.lockWallpaperColors == wallpaperColors2)
++            if (wallpapersColorsChanged) {
++                colorProvider.homeWallpaperColors = wallpaperColors3
++                colorProvider.lockWallpaperColors = wallpaperColors2
++            }
++            val list = colorProvider.colorBundles
++            if (list == null || wallpapersColorsChanged) {
++                mLifecycleOwner.lifecycleScope.launch {
++                    if (wallpapersColorsChanged) {
++                        ColorProvider.loadSeedColors(
++                            colorProvider,
++                            wallpaperColors3,
++                            wallpaperColors2
++                        )
++                    }
++                    optionsFetcher.onOptionsLoaded(colorProvider.colorBundles!!)
++                }
++            } else {
++                optionsFetcher.onOptionsLoaded(list)
++            }
++        }
++    }
++
++    fun setUpColorOptionsController(optionSelectorController: OptionSelectorController<ColorOption>) {
++        if (mSelectedColor != null && optionSelectorController.containsOption(mSelectedColor)) {
++            optionSelectorController.setSelectedOption(mSelectedColor)
++        }
++        optionSelectorController.addListener {
++            if (mSelectedColor != it) {
++                mSelectedColor = (it as ColorOption)
++                Handler(Looper.getMainLooper()).postDelayed({
++                    mColorManager.setThemeBundle(this, it)
++                }, 100L)
++                return@addListener
++            }
++        }
++    }
++
++    override fun onSaveInstanceState(bundle: Bundle) {
++        val viewPager2 = mColorViewPager
++        bundle.putInt("COLOR_TAB_POSITION", viewPager2.currentItem)
++    }
++
++    init {
++        mEventLogger =
++            (InjectorProvider.getInjector() as CustomizationInjector).getUserEventLogger(activity) as ThemesUserEventLogger
++        mColorManager =
++            ColorCustomizationManager.getInstance(activity!!)!!
++        mWallpaperColorsViewModel = wallpaperColorsViewModel
++        mLifecycleOwner = lifecycleOwner
++        if (bundle != null && bundle.containsKey("COLOR_TAB_POSITION")) {
++            mTabPositionToRestore = bundle.getInt("COLOR_TAB_POSITION")
++        }
++    }
++}
+diff --git a/src/com/statix/android/customization/model/color/ColorSeedOption.kt b/src/com/statix/android/customization/model/color/ColorSeedOption.kt
+new file mode 100644
+index 0000000..e9a5ba9
+--- /dev/null
++++ b/src/com/statix/android/customization/model/color/ColorSeedOption.kt
+@@ -0,0 +1,56 @@
++package com.statix.android.customization.model.color
++
++import android.content.res.Configuration
++import android.graphics.PorterDuff
++import android.view.View
++import android.widget.ImageView
++import com.android.wallpaper.R
++
++class ColorSeedOption(
++    title: String?,
++    map: Map<String?, String?>?,
++    isDefault: Boolean,
++    override val source: String,
++    index: Int,
++    private val mPreviewInfo: PreviewInfo
++) : ColorOption(
++    title!!, map!!, isDefault, index
++) {
++    private val mPreviewColorIds = intArrayOf(
++        R.id.color_preview_0,
++        R.id.color_preview_1,
++        R.id.color_preview_2,
++        R.id.color_preview_3
++    )
++
++    override fun bindThumbnailTile(view: View) {
++        val padding: Int
++        val resources = view.context.resources
++        var iterator = 0
++        val mPreviewColorTint =
++            if ((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) mPreviewInfo.darkColors else mPreviewInfo.lightColors
++        padding = if (view.isActivated) {
++            resources.getDimensionPixelSize(R.dimen.color_seed_option_tile_padding_selected)
++        } else {
++            resources.getDimensionPixelSize(R.dimen.color_seed_option_tile_padding)
++        }
++        while (true) {
++            if (iterator < mPreviewColorIds.size) {
++                val imageView = view.findViewById<View>(mPreviewColorIds[iterator]) as ImageView
++                imageView.drawable.setColorFilter(mPreviewColorTint[iterator], PorterDuff.Mode.SRC)
++                imageView.setPadding(padding, padding, padding, padding)
++                iterator++
++            } else {
++                view.contentDescription =
++                    view.context.getString(R.string.wallpaper_color_title)
++                return
++            }
++        }
++    }
++
++    override fun getLayoutResId(): Int {
++        return R.layout.color_seed_option
++    }
++
++    class PreviewInfo(var lightColors: IntArray, var darkColors: IntArray)
++}
+diff --git a/src/com/statix/android/customization/model/color/ColorUtils.java b/src/com/statix/android/customization/model/color/ColorUtils.java
+index 773b811..e4891b3 100644
+--- a/src/com/statix/android/customization/model/color/ColorUtils.java
++++ b/src/com/statix/android/customization/model/color/ColorUtils.java
+@@ -43,4 +43,8 @@
+         }
+         return sSysuiRes.getBoolean(sFlagId);
+     }
++
++    public static String toColorString(int color) {
++        return String.format("#%06X", color & 0x00ffffff);
++    }
+ }
+diff --git a/src/com/statix/android/customization/module/StatixCustomizationSections.java b/src/com/statix/android/customization/module/StatixCustomizationSections.java
+index 90aa501..23733a9 100644
+--- a/src/com/statix/android/customization/module/StatixCustomizationSections.java
++++ b/src/com/statix/android/customization/module/StatixCustomizationSections.java
+@@ -21,6 +21,7 @@
+ import com.android.wallpaper.model.WorkspaceViewModel;
+ import com.android.wallpaper.module.CustomizationSections;
+ 
++import com.statix.android.customization.model.color.ColorSectionController;
+ import com.statix.android.customization.model.iconpack.IconPackManager;
+ import com.statix.android.customization.model.iconpack.IconPackSectionController;
+ 
+@@ -45,6 +46,11 @@
+                 workspaceViewModel, sectionNavigationController, wallpaperPreviewNavigator,
+                 savedInstanceState));
+ 
++        // Color section
++        sectionControllers.add(
++            new ColorSectionController(activity, wallpaperColorsViewModel, lifecycleOwner,
++                savedInstanceState, sectionNavigationController));
++
+         // Dark/Light theme section.
+         sectionControllers.add(new DarkModeSectionController(activity,
+                 lifecycleOwner.getLifecycle()));
+diff --git a/src/com/statix/android/customization/picker/color/ColorSectionView.kt b/src/com/statix/android/customization/picker/color/ColorSectionView.kt
+new file mode 100644
+index 0000000..7a51176
+--- /dev/null
++++ b/src/com/statix/android/customization/picker/color/ColorSectionView.kt
+@@ -0,0 +1,8 @@
++package com.statix.android.customization.picker.color
++
++import android.content.Context
++import android.util.AttributeSet
++import com.android.wallpaper.picker.SectionView
++
++class ColorSectionView(context: Context?, attributeSet: AttributeSet?) :
++    SectionView(context, attributeSet)
