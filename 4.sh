@@ -1,6 +1,6 @@
 # sync rom
-mkdir ~/home/disk/m/404
-cd ~/home/disk/m/404
+mkdir ~/disk/m/404
+cd ~/disk/m/404
 repo init --depth=1 -u https://github.com/P-404/android_manifest -b shinka 
 git clone https://github.com/XenStuff/manifest --depth=1 -b 404 .repo/local_manifests
 repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync
