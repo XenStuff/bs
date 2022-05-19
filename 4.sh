@@ -1,5 +1,5 @@
 # sync rom
-mkdir ~/m/404
+mkdir -p ~/m/404
 cd ~/m/404
 repo init -u https://github.com/P-404/android_manifest -b shinka 
 git clone https://github.com/XenStuff/android_device_xiaomi_sdm660-common device/xiaomi/sdm660-common
